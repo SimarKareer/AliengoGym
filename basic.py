@@ -1,17 +1,28 @@
+import argparse
 from habitat_baselines.common.environments import LocomotionRLEnv
-from habitat import Config
+from habitat_baselines.config.default import get_config
 
-def main():
-    config = Config({"TASK_CONFIG": {"num_joints": 12}})
-    env = LocomotionRLEnv(config)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-e", "--exp-config",
+        type=str,
+        required=True,
+        help="path to config yaml containing info about experiment",
+    )
+    parser.add_argument(
+        "opts",
+        default=None,
+        nargs=argparse.REMAINDER,
+        help="Modify config options from command line",
+    )
+    args = parser.parse_args()
+
+    config = get_config(args.exp_config, args.opts)
+    env = LocomotionRLEnv(config=config)
     obs = env.reset(render_episode=True)
-
     done = False
     while not done:
         action = env.action_space.sample()
-        # actionDict = {"action": action}
-        obs, reward, done, info = env.step(action=action)
-    
-    print("Episode Done!")
-
-main()
+        obs, reward, done, info = env.step(action)
+    print('Episode done!')
